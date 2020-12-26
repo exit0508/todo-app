@@ -135,6 +135,11 @@ import TodoInput from '@/components/TodoInput.vue'
 import SubtodoInput from '@/components/SubtodoInput.vue'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
+//import VueToast from 'vue-toast-notification';
+// Import one of the available themes
+//import 'vue-toast-notification/dist/theme-default.css';
+
+
 
 export default {
   name: 'Home',
@@ -150,6 +155,9 @@ export default {
       database: null,
       todosRef: null,
       subtodosRef: null,
+      getIdRef: null,
+      todoKey: '',
+      idForTodo: 1,
       subtodos: [],
       subtodosArry: [],
       microtodo: '',
@@ -161,7 +169,6 @@ export default {
       subid: 0,
       idForSubtodo: 1,
       newTodo: '',
-      idForTodo: 1,
       interest: '0',
       pleasant: '0',
       complexity: '0',
@@ -178,12 +185,21 @@ export default {
       this.user = firebase.auth().currentUser.uid;
       this.todosRef = this.database.ref( this.user +'/todos') //データの読み書きを行う
       this.subtodosRef = this.database.ref( this.user + '/subtodos')
-
+      
       var _this = this;
         //データに変更があると実行される
         this.todosRef.on('value', function(snapshot){ //onメソッド：イベントを監視
           _this.todos = snapshot.val(); //再取得してtodosに格納
       });
+
+      if( this.todosRef != null){
+        this.getIdRef = firebase.database().ref(this.user +'/todos').orderByChild( this.todoKey +'/id').limitToLast(1)
+        this.getIdRef.on('child_added', function(snapshot){
+          var latestTodo = snapshot.val()
+          _this.idForTodo = latestTodo.id
+        })
+      }
+
       this.subtodosRef.on('value', function(snapshot){
           _this.subtodos = snapshot.val();
       });
@@ -210,8 +226,7 @@ export default {
       }
 
       var now = new Date()
-
-      this.subtodosRef.push({
+      this.todoKey = this.subtodosRef.push({
           id: this.idForSubtodo,
           subid: this.subid,
           title: microtodo,
@@ -223,9 +238,9 @@ export default {
           editing: false,
           createAt: now,
           completedAt: null
-      })
+      }).key
 
-      this.idForSubtodo ++
+      //this.idForSubtodo ++
     },
     focusInput: function(todo) {
         this.subid = todo.id
@@ -253,6 +268,11 @@ export default {
       if (todo.trim().length == 0) {
             return
         }
+        
+        if(complexity > 3){
+          //this.$toast.open('Howdy!');
+        }
+
         const now = Date();
         //console.log(now)
 
