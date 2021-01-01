@@ -192,11 +192,11 @@ export default {
           _this.todos = snapshot.val(); //再取得してtodosに格納
       });
 
-      if( this.todosRef != null){
+      if( this.todosRef != null){ //DBがnullじゃなかったら
         this.getIdRef = firebase.database().ref(this.user +'/todos').orderByChild( this.todoKey +'/id').limitToLast(1)
         this.getIdRef.on('child_added', function(snapshot){
           var latestTodo = snapshot.val()
-          _this.idForTodo = latestTodo.id
+          _this.idForTodo = latestTodo.id + 1  //最後のidをidForTodoに代入する
         })
       }
 
@@ -224,7 +224,6 @@ export default {
       if (microtodo.trim().length == 0) {
           return
       }
-
       var now = new Date()
       this.todoKey = this.subtodosRef.push({
           id: this.idForSubtodo,
@@ -240,7 +239,7 @@ export default {
           completedAt: null
       }).key
 
-      //this.idForSubtodo ++
+      this.idForSubtodo ++
     },
     focusInput: function(todo) {
         this.subid = todo.id
@@ -288,7 +287,7 @@ export default {
           editing: false,
           completedAt: ''
         })
-        this.idForTodo++
+        //this.idForTodo++
     },
     removeTodo: function(index) {
           this.database.ref( this.user +'/todos').child(index).remove();
