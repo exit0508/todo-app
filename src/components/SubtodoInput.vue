@@ -1,5 +1,5 @@
 <template>
-    <div class="TodoInput">
+    <div class="SubtodoInput">
         <div class="ui container left aligned">
             <div class="ui stackable container todo-form">
                 <div class="ui tall stacked segment">

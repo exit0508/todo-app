@@ -2,123 +2,145 @@
   <div class="home">
     <menu-bar></menu-bar>
     <todo-input @todo-form="addTodo"></todo-input>
-    <div class="ui container left aligned todo-list">
+    <div class="ui container left aligned">
       <h3 class="ui header">登録済みタスク</h3>
-      <div class="ui grid">
-        <div class="row">
-          <div class="one column"></div>
-          <div class="four wide column">タイトル</div>
-          <div class="two wide column">興味</div>
-          <div class="two wide column">楽しさ</div>
-          <div class="two wide column">複雑度</div>
-          <div class="two wide column">重要度</div>
-          <div class="three wide column">編集/削除</div>
+      <div class="todo-wrapper">
+        <div class="item-title">
+          タイトル
         </div>
+        <div class="item">
+          興味
+        </div>
+        <div class="item">
+          楽しさ
+        </div>
+        <div class="item">
+          複雑さ
+        </div>
+        <div class="item">
+          重要性
+        </div>
+        <div class="item">
+          締切
+        </div>
+        <div class="item-edit">
+          編集/削除
+        </div>
+        <hr size="10" width="100%" align="center" class="divider">
       </div>
-      <div class="ui divider"></div>
-      <div v-for="(todo, index) in todos" v-bind:key="todo.id" class="macro-todolist">
-          <div class="ui grid">
-            <div class="row">
-              <div class="one column todo-item">
-                <input type="checkbox" v-model="todo.completed" v-on:click="completedTodo(index)">
-              </div>
-            <div class="four wide column todo-item" :class="{completed: todo.completed}">
-              <span v-if="!todo.editing">{{ todo.title }}</span>
-              <div v-else class="ui input">
-                <input type="text" v-model="todo.title" v-show="todo.editing">
-              </div>
-            </div>
-            <div class="two wide column todo-item">
-              {{ todo.interest }}
-              <vue-slider v-show="todo.editing" v-model.number="todo.interest" :min="0" :max="5"></vue-slider>
-            </div>
-            <div class="two wide column todo-item">
-              {{ todo.pleasant }}
-              <vue-slider v-show="todo.editing" v-model.number="todo.pleasant" :min="0" :max="5"></vue-slider>
-            </div>
-            <div class="two wide column todo-item">
-              {{ todo.complexity }}
-              <vue-slider v-show="todo.editing" v-model.number="todo.complexity" :min="0" :max="5"></vue-slider>
-            </div>
-            <div class="two wide column todo-item">
-              {{ todo.importance }}
-              <vue-slider v-show="todo.editing" v-model.number="todo.importance" :min="0" :max="5"></vue-slider>
-            </div>
-            <div class="three wide column">
-              <div class="buttons">
-                <button v-show="!todo.editing" v-on:click="editTodo(todo, index)" class="ui icon button"><i class="edit icon"></i></button>
-                <button v-show="todo.editing" v-on:click="doneEdit(todo, index)" class="ui icon button"><i class="check icon"></i></button>
-                <button v-on:click="removeTodo(index)" class="ui icon button"><i class="times icon"></i></button>
-              </div>
+      <div v-for="(todo, index) in todos" v-bind:key="todo.id" class="todo-wrapper">
+        <div class="item-title">
+          <input type="checkbox" v-model="todo.completed" v-on:click="completedTodo(index)" class="check-box">
+          <div :class="{completed: todo.completed}">
+            <div v-if="!todo.editing">{{ todo.title }}</div>
+            <div v-else class="ui input">
+              <input type="text" v-model="todo.title" v-show="todo.editing">
             </div>
           </div>
         </div>
+        <div class="item">
+          {{ todo.interest }}
+          <vue-slider v-show="todo.editing" v-model.number="todo.interest" :min="0" :max="5"></vue-slider>
+        </div>
+        <div class="item">
+          {{ todo.pleasant }}
+          <vue-slider v-show="todo.editing" v-model.number="todo.pleasant" :min="0" :max="5"></vue-slider>
+        </div>
+        <div class="item">
+          {{ todo.complexity }}
+          <vue-slider v-show="todo.editing" v-model.number="todo.complexity" :min="0" :max="5"></vue-slider>
+        </div>
+        <div class="item">
+          {{ todo.importance }}
+          <vue-slider v-show="todo.editing" v-model.number="todo.importance" :min="0" :max="5"></vue-slider>
+        </div>
+        <div class="item">
+          {{ todo.deadline }}
+        </div>
+        <div class="item-edit">
+          <div class="buttons">
+            <button v-show="!todo.editing" v-on:click="editTodo(todo, index)" class="ui icon button"><i class="edit icon"></i></button>
+            <button v-show="todo.editing" v-on:click="doneEdit(todo, index)" class="ui icon button"><i class="check icon"></i></button>
+            <button v-on:click="removeTodo(index)" class="ui icon button"><i class="times icon"></i></button>
+          </div>
+        </div>
         <div v-if="todo.complexity > 2">
-          <div class="ui segment">
-            <div class="ui grid">
-              <div class="row">
-                <div class="one column"></div>
-                <div class="four wide column">サブタスク</div>
-                <div class="two wide column">興味</div>
-                <div class="two wide column">楽しさ</div>
-                <div class="two wide column">複雑度</div>
-                <div class="two wide column">重要度</div>
-                <div class="three wide column">編集/削除</div>
+          <div class="ui segment subtodo-list">
+            <div class="todo-wrapper">
+              <div class="item-title">
+                タイトル
               </div>
-              <div class="ui divider"></div>
+              <div class="item">
+                興味
+              </div>
+              <div class="item">
+                楽しさ
+              </div>
+              <div class="item">
+                複雑さ
+              </div>
+              <div class="item">
+                重要性
+              </div>
+              <div class="item">
+                締切
+              </div>
+              <div class="item-edit">
+                編集/削除
+              </div>
+              <hr size="10" width="100%" align="center" class="divider">
             </div>
-            <div v-for="(subtodo, index) in subtodos" v-bind:key="subtodo.id" class="subtodo-list">
-              <div v-show="todo.id == subtodo.subid">
-                <div class="ui grid">
-                  <div class="row">
-                    <div class="one column subtodo-item">
-                      <input type="checkbox">
+            <div v-for="(subtodo, index) in subtodos" v-bind:key="subtodo.id">
+              <div v-show="todo.id == subtodo.subid" class="todo-wrapper">
+                <div class="item-title">
+                  <input type="checkbox" v-model="subtodo.completed" v-on:click="completedTodo(index)" class="check-box">
+                    <div :class="{completed: todo.completed}">
+                      <div v-if="!subtodo.editing">{{ subtodo.title }}</div>
+                      <div v-else class="ui input">
+                        <input type="text" v-model="subtodo.title" v-show="subtodo.editing">
+                      </div>
                     </div>
-                  <div class="four wide column subtodo-item">
-                    <span v-if="!subtodo.editing">{{ subtodo.title }}</span>
-                    <div v-else class="ui input">
-                      <input type="text" v-model="subtodo.title" v-show="subtodo.editing">
-                    </div>
-                  </div>
-                  <div class="two wide column subtodo-item">
-                    {{ subtodo.interest }}
-                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.interest" :min="0" :max="5"></vue-slider>
-                  </div>
-                  <div class="two wide column subtodo-item">
-                    {{ subtodo.pleasant }}
-                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.pleasant" :min="0" :max="5"></vue-slider>
-                  </div>
-                  <div class="two wide column subtodo-item">
-                    {{ subtodo.complexity }}
-                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.complexity" :min="0" :max="5"></vue-slider>
-                  </div>
-                  <div class="two wide column subtodo-item">
-                    {{ subtodo.importance }}
-                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.importance" :min="0" :max="5"></vue-slider>
-                  </div>
-                  <div class="three wide column buttons">
-                    <div class="subbuttons">
-                      <button v-show="!subtodo.editing" v-on:click="editMicrotodo(subtodo, index)" class="ui icon button"><i class="edit icon"></i></button>
+                </div>
+                <div class="item">
+                  {{ subtodo.interest }}
+                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.interest" :min="0" :max="5"></vue-slider>
+                </div>
+                <div class="item">
+                  {{ subtodo.pleasant }}
+                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.pleasant" :min="0" :max="5"></vue-slider>
+                </div>
+                <div class="item">
+                  {{ subtodo.complexity }}
+                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.complexity" :min="0" :max="5"></vue-slider>
+                </div>
+                <div class="item">
+                  {{ subtodo.importance }}
+                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.importance" :min="0" :max="5"></vue-slider>
+                </div>
+                <div class="item">
+                  {{ subtodo.deadline }}
+                </div>
+                <div class="item-edit">
+                  <div class="buttons">
+                    <button v-show="!subtodo.editing" v-on:click="editMicrotodo(subtodo, index)" class="ui icon button"><i class="edit icon"></i></button>
                     <button v-show="subtodo.editing" v-on:click="doneMicroEdit(subtodo, index)" class="ui icon button"><i class="check icon"></i></button>
                     <button v-on:click="removeMicrotodo(subtodo, index)" class="ui icon button"><i class="times icon"></i></button>
-                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             </div>
             <div v-if="display" class="micro-form">
               <subtodo-input @subtodo-form="addMicrotask" @input-focus="focusInput(todo)" @close-form="display = false"></subtodo-input>
             </div>
             <div v-else>
-              <div class="ui right aligned grid">
-                  <div class="sixteen wide column">
-                    <button @click="display = true" class="ui labeled icon blue button">
-                      <i class="times icon"></i>
-                      フォーム表示
-                    </button>
-                  </div>
-              </div>
+                <div class="ui right aligned grid">
+                    <div class="sixteen wide column">
+                      <button @click="display = true" class="ui labeled icon blue button">
+                        <i class="times icon"></i>
+                        フォーム表示
+                      </button>
+                    </div>
+                </div>
             </div>
           </div>
         </div>
@@ -225,7 +247,7 @@ export default {
           return
       }
       var now = new Date()
-      this.todoKey = this.subtodosRef.push({
+      this.subtodosRef.push({
           id: this.idForSubtodo,
           subid: this.subid,
           title: microtodo,
@@ -236,8 +258,9 @@ export default {
           completed: false,
           editing: false,
           createAt: now,
-          completedAt: null
-      }).key
+          completedAt: null,
+          deadline: '-'
+      })
 
       this.idForSubtodo ++
     },
@@ -275,7 +298,7 @@ export default {
         const now = Date();
         //console.log(now)
 
-        this.todosRef.push({
+        this.todoKey = this.todosRef.push({
           id: this.idForTodo,
           createAt: now,
           title: todo,
@@ -285,7 +308,8 @@ export default {
           importance: importance,
           completed: false,
           editing: false,
-          completedAt: ''
+          completedAt: '',
+          deadline: '-'
         })
         //this.idForTodo++
     },
@@ -306,9 +330,8 @@ export default {
       updates[ this.user +'/todos/' + index] = todo;
       this.database.ref().update(updates);
     },
-    completedTodo(index){
+    completedTodo(todo, index){
       const now =  Date()
-
       var updates = {};
       updates[ index + '/completedAt'] = now
 
@@ -334,56 +357,38 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-}
-
-
-  .todo-list {
-    font-size: 17px;
-    margin-top: 5%;
-    margin-bottom: 3%;
-  }
-
-  .todo-title {
-      width: 30%;
-    }
-
-  .todo-param {
-      width: 13%;
-  }
-
-  .todo-item {
-    padding-top: 2%;
-    padding-bottom: 1%;
-      align-items:center;
-      justify-content:center;
-      font-weight: 700;
-  }
-  
-  .param-label {
-      font-size: small;
-  }
-
-  .param-level {
-      font-size: large;
-      font-weight: 600;
   }
 
   .subtodo-list {
-    margin-top: 2%;
-    .subbuttons {
-      margin-bottom: -8%;
-    }
+    margin-top: 10px;
   }
 
-  .macro-todolist {
-    margin-bottom: 2%;
-    .buttons {
-      margin-top: 6%;
-    }
-  }
+  .todo-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 3px;
 
-  .subtodo-item {
-    margin-top: 3%;
+    .item-title {
+      width: 20%;
+      display: flex;
+
+      .check-box {
+        margin-right: 10px;
+        margin-top: 2px;
+      }
+    }
+
+    .item {
+      width: 13%;
+      padding-right: 8px;
+    }
+
+    .item-edit {
+      width: 15%;
+      margin-bottom: 5px;
+    }
   }
 
   .completed {
