@@ -56,6 +56,13 @@
         </div>
         <div class="item">
           {{ todo.deadline }}
+          <v-date-picker v-model="todo.deadline" :model-config="modelConfig">
+            <template v-slot="{ inputValue, inputEvents }">
+              <div class="ui input deadline">
+                <input type="text" :value="inputValue" v-on="inputEvents" v-show="todo.editing">
+              </div>
+            </template>
+          </v-date-picker>
         </div>
         <div class="item-edit">
           <div class="buttons">
@@ -65,7 +72,7 @@
           </div>
         </div>
         <div v-if="todo.complexity > 2">
-          <div class="ui segment subtodo-list">
+          <div class="ui container segment subtodo-list">
             <div class="todo-wrapper">
               <div class="item-title">
                 タイトル
@@ -119,6 +126,13 @@
                 </div>
                 <div class="item">
                   {{ subtodo.deadline }}
+                  <v-date-picker v-model="subtodo.deadline" :model-config="modelConfig">
+                    <template v-slot="{ inputValue, inputEvents }">
+                      <div class="ui input deadline">
+                        <input type="text" :value="inputValue" v-on="inputEvents" v-show="subtodo.editing">
+                      </div>
+                    </template>
+                  </v-date-picker>
                 </div>
                 <div class="item-edit">
                   <div class="buttons">
@@ -133,14 +147,14 @@
               <subtodo-input @subtodo-form="addMicrotask" @input-focus="focusInput(todo)" @close-form="display = false"></subtodo-input>
             </div>
             <div v-else>
-                <div class="ui right aligned grid">
-                    <div class="sixteen wide column">
-                      <button @click="display = true" class="ui labeled icon blue button">
-                        <i class="times icon"></i>
-                        フォーム表示
-                      </button>
-                    </div>
-                </div>
+              <div class="ui right aligned grid">
+                  <div class="sixteen wide column">
+                    <button @click="display = true" class="ui labeled icon blue button">
+                      <i class="pencil alternate icon"></i>
+                      フォーム表示
+                    </button>
+                  </div>
+              </div>
             </div>
           </div>
         </div>
@@ -198,7 +212,11 @@ export default {
       beforeEditCache: '',
       completed: false,
       todos: [],
-      display: true
+      display: true,
+      modelConfig: {
+        type: 'string',
+        mask: 'YYYY-MM-DD', // Uses 'iso' if missing
+      },
     }
   },
   created: function() {
@@ -383,6 +401,10 @@ export default {
     .item {
       width: 13%;
       padding-right: 8px;
+
+      .deadline {
+        width: 98%;
+      }
     }
 
     .item-edit {
