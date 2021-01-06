@@ -2,7 +2,8 @@ import Vue from 'vue'
 import firebase from 'firebase'
 import App from './App.vue'
 import router from './router'
-import VCalendar from 'v-calendar';
+import VCalendar from 'v-calendar'
+
 
 Vue.config.productionTip = false
 
@@ -26,4 +27,5 @@ new Vue({
 }).$mount('#app')
 
 Vue.use(VCalendar)
+
 

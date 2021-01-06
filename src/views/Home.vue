@@ -97,52 +97,54 @@
               </div>
               <hr size="10" width="100%" align="center" class="divider">
             </div>
-            <div v-for="(subtodo, index) in subtodos" v-bind:key="subtodo.id">
-              <div v-show="todo.id == subtodo.subid" class="todo-wrapper">
-                <div class="item-title">
-                  <input type="checkbox" v-model="subtodo.completed" v-on:click="completedTodo(index)" class="check-box">
-                    <div :class="{completed: todo.completed}">
-                      <div v-if="!subtodo.editing">{{ subtodo.title }}</div>
-                      <div v-else class="ui input">
-                        <input type="text" v-model="subtodo.title" v-show="subtodo.editing">
+            <draggable :list="subtodosArry" ghost-class="ghost" @start="dragging = true" @end="updateOrder">
+              <div v-for="(subtodo, index) in subtodosArry" :key="subtodo.id">
+                <div v-show="todo.id == subtodo.subid" class="todo-wrapper">
+                  <div class="item-title">
+                    <input type="checkbox" v-model="subtodo.completed" v-on:click="completedTodo(index)" class="check-box">
+                      <div :class="{completed: todo.completed}">
+                        <div v-if="!subtodo.editing">{{ subtodo.title }}</div>
+                        <div v-else class="ui input">
+                          <input type="text" v-model="subtodo.title" v-show="subtodo.editing">
+                        </div>
                       </div>
+                  </div>
+                  <div class="item">
+                    {{ subtodo.interest }}
+                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.interest" :min="0" :max="5"></vue-slider>
+                  </div>
+                  <div class="item">
+                    {{ subtodo.pleasant }}
+                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.pleasant" :min="0" :max="5"></vue-slider>
+                  </div>
+                  <div class="item">
+                    {{ subtodo.complexity }}
+                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.complexity" :min="0" :max="5"></vue-slider>
+                  </div>
+                  <div class="item">
+                    {{ subtodo.importance }}
+                    <vue-slider v-show="subtodo.editing" v-model.number="subtodo.importance" :min="0" :max="5"></vue-slider>
+                  </div>
+                  <div class="item">
+                    {{ subtodo.deadline }}
+                    <v-date-picker v-model="subtodo.deadline" :model-config="modelConfig">
+                      <template v-slot="{ inputValue, inputEvents }">
+                        <div class="ui input deadline">
+                          <input type="text" :value="inputValue" v-on="inputEvents" v-show="subtodo.editing">
+                        </div>
+                      </template>
+                    </v-date-picker>
+                  </div>
+                  <div class="item-edit">
+                    <div class="buttons">
+                      <button v-show="!subtodo.editing" v-on:click="editMicrotodo(subtodo)" class="ui icon button"><i class="edit icon"></i></button>
+                      <button v-show="subtodo.editing" v-on:click="doneMicroEdit(subtodo, index)" class="ui icon button"><i class="check icon"></i></button>
+                      <button v-on:click="removeMicrotodo(subtodo, index)" class="ui icon button"><i class="times icon"></i></button>
                     </div>
-                </div>
-                <div class="item">
-                  {{ subtodo.interest }}
-                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.interest" :min="0" :max="5"></vue-slider>
-                </div>
-                <div class="item">
-                  {{ subtodo.pleasant }}
-                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.pleasant" :min="0" :max="5"></vue-slider>
-                </div>
-                <div class="item">
-                  {{ subtodo.complexity }}
-                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.complexity" :min="0" :max="5"></vue-slider>
-                </div>
-                <div class="item">
-                  {{ subtodo.importance }}
-                  <vue-slider v-show="subtodo.editing" v-model.number="subtodo.importance" :min="0" :max="5"></vue-slider>
-                </div>
-                <div class="item">
-                  {{ subtodo.deadline }}
-                  <v-date-picker v-model="subtodo.deadline" :model-config="modelConfig">
-                    <template v-slot="{ inputValue, inputEvents }">
-                      <div class="ui input deadline">
-                        <input type="text" :value="inputValue" v-on="inputEvents" v-show="subtodo.editing">
-                      </div>
-                    </template>
-                  </v-date-picker>
-                </div>
-                <div class="item-edit">
-                  <div class="buttons">
-                    <button v-show="!subtodo.editing" v-on:click="editMicrotodo(subtodo, index)" class="ui icon button"><i class="edit icon"></i></button>
-                    <button v-show="subtodo.editing" v-on:click="doneMicroEdit(subtodo, index)" class="ui icon button"><i class="check icon"></i></button>
-                    <button v-on:click="removeMicrotodo(subtodo, index)" class="ui icon button"><i class="times icon"></i></button>
                   </div>
                 </div>
               </div>
-            </div>
+            </draggable>
             <div v-if="display" class="micro-form">
               <subtodo-input @subtodo-form="addMicrotask" @input-focus="focusInput(todo)" @close-form="display = false"></subtodo-input>
             </div>
@@ -171,9 +173,8 @@ import TodoInput from '@/components/TodoInput.vue'
 import SubtodoInput from '@/components/SubtodoInput.vue'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
-//import VueToast from 'vue-toast-notification';
+import draggable from 'vuedraggable'
 // Import one of the available themes
-//import 'vue-toast-notification/dist/theme-default.css';
 
 
 
@@ -183,7 +184,8 @@ export default {
     MenuBar,
     TodoInput,
     SubtodoInput,
-    VueSlider
+    VueSlider,
+    draggable
   },
   data(){
     return {
@@ -192,7 +194,9 @@ export default {
       todosRef: null,
       subtodosRef: null,
       getIdRef: null,
+      getIdSubRef: null,
       todoKey: '',
+      subtodoKey: '',
       idForTodo: 1,
       subtodos: [],
       subtodosArry: [],
@@ -217,6 +221,7 @@ export default {
         type: 'string',
         mask: 'YYYY-MM-DD', // Uses 'iso' if missing
       },
+      dragging: false
     }
   },
   created: function() {
@@ -242,20 +247,30 @@ export default {
 
       this.subtodosRef.on('value', function(snapshot){
           _this.subtodos = snapshot.val();
-      });
+      })
+
+      if( this.subtodosRef != null){ //DBがnullじゃなかったら
+        this.getIdSubRef = firebase.database().ref(this.user +'/subtodos').orderByChild( this.subtodoKey +'/id').limitToLast(1)
+        this.getIdSubRef.on('child_added', function(snapshot){
+          var latestSubtodo = snapshot.val()
+          _this.idForSubtodo = latestSubtodo.id + 1  //最後のidをidForTodoに代入する
+        })
+      }
 
       this.subtodosRef.on('value', (data)=>{
           if(data){
               const rootList = data.val();
               //const key = data.key;
-
+              const subtodosArry2 = [];
               if(rootList != null){
                   Object.keys(rootList).forEach((val) => {
-                      //rootList[val].id = val;
-                      this.subtodosArry.push(rootList[val])
+                      //this.$set(rootList[val], 'key', val)
+                      rootList[val].key = val;
+                      subtodosArry2.push(rootList[val])
                   })
+                  this.subtodosArry = [...new Map(subtodosArry2.map((v) => [v.id, v])).values()];
+                  console.log(this.subtodosArry)
               }
-
           }
       })
   },
@@ -265,7 +280,8 @@ export default {
           return
       }
       var now = new Date()
-      this.subtodosRef.push({
+      this.subtodoKey = this.subtodosRef.push({
+          order: '',
           id: this.idForSubtodo,
           subid: this.subid,
           title: microtodo,
@@ -278,30 +294,32 @@ export default {
           createAt: now,
           completedAt: null,
           deadline: '-'
-      })
+      }).key
 
-      this.idForSubtodo ++
+      //this.idForSubtodo ++
     },
     focusInput: function(todo) {
         this.subid = todo.id
         console.log(this.subid)
     },
-    removeMicrotodo: function(subtodos, index){
+    removeMicrotodo: function(subtodo, index){
       this.subtodosArry.splice(index, 1);
-      this.database.ref( this.user  + '/subtodos').child(index).remove();
+      console.log(subtodo.key)
+      this.database.ref( this.user  + '/subtodos').child(subtodo.key).remove();
     },
-    editMicrotodo(subtodo, index){
+    editMicrotodo(subtodo){
         this.beforeEditCache = subtodo.title
-        this.$set(this.subtodos[index], 'editing', true)
-        this.subtodosArry.splice(index, 1, subtodo)
+        subtodo.editing = true;
+        this.$set(this.subtodos[subtodo.key], 'editing', true)
     },
     doneMicroEdit(subtodo, index){
         if (subtodo.title.trim() == '') {
         this.title = this.beforeEditCache
         }
         subtodo.editing = false;
+        this.subtodosArry.splice(index, 1, subtodo)
         var updates = {};
-        updates[index] = subtodo;
+        updates[subtodo.key] = subtodo;
         this.subtodosRef.update(updates)
     },
     addTodo: function(todo, interest, pleasant, complexity, importance){
@@ -309,9 +327,6 @@ export default {
             return
         }
         
-        if(complexity > 3){
-          //this.$toast.open('Howdy!');
-        }
 
         const now = Date();
         //console.log(now)
@@ -354,16 +369,25 @@ export default {
       updates[ index + '/completedAt'] = now
 
       this.todosRef.update(updates);
+    },
+    updateOrder(){
+      console.log(this.subtodosArry)
+      const obj = {}
+      this.subtodosArry.forEach((data) =>{
+        obj[data.key] = data;
+        delete obj[data.key].key
+      })
+      console.log(obj)
+      
     }
-    
   },
   computed: {
-    checkMicrotasks: function(){
-        if(this.subtodosArry.length > 3){
-            return this.subtodosArry.every(item => item.complexity < 3)
-        }else{
-            return false
-        }
+    SortedMicrotasks: function(){
+      return this.subtodosArry.slice().sort((a, b) => {
+        if (a.order < b.order) return -1
+        if (a.order > b.order) return 1
+        return 0
+      })
     }
   }
 }
