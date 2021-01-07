@@ -97,10 +97,11 @@
               </div>
               <hr size="10" width="100%" align="center" class="divider">
             </div>
-            <draggable :list="subtodosArry" ghost-class="ghost" @start="dragging = true" @end="updateOrder">
+            <draggable :list="subtodosArry" ghost-class="ghost" @start="dragging = true" @end="updateOrder" handle=".handle" group="sutodos">
               <div v-for="(subtodo, index) in subtodosArry" :key="subtodo.id">
                 <div v-show="todo.id == subtodo.subid" class="todo-wrapper">
                   <div class="item-title">
+                    <span class="dragbar handle"><i class="bars icon"></i></span>
                     <input type="checkbox" v-model="subtodo.completed" v-on:click="completedTodo(index)" class="check-box">
                       <div :class="{completed: todo.completed}">
                         <div v-if="!subtodo.editing">{{ subtodo.title }}</div>
@@ -174,6 +175,7 @@ import SubtodoInput from '@/components/SubtodoInput.vue'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 import draggable from 'vuedraggable'
+//import _ from 'lodash';
 // Import one of the available themes
 
 
@@ -205,7 +207,7 @@ export default {
       subPleasant: 0,
       subComplexity: 0,
       subImportance: 0,
-      subidArry: [],
+      todoArry: [],
       subid: 0,
       idForSubtodo: 1,
       newTodo: '',
@@ -270,6 +272,23 @@ export default {
                   })
                   this.subtodosArry = [...new Map(subtodosArry2.map((v) => [v.id, v])).values()];
                   console.log(this.subtodosArry)
+              }
+          }
+      })
+
+      this.todosRef.on('value', (data)=>{
+          if(data){
+              const rootList = data.val();
+              //const key = data.key;
+              const todosArry2 = [];
+              if(rootList != null){
+                  Object.keys(rootList).forEach((val) => {
+                      //this.$set(rootList[val], 'key', val)
+                      rootList[val].key = val;
+                      todosArry2.push(rootList[val])
+                  })
+                  this.todosArry = [...new Map(todosArry2.map((v) => [v.id, v])).values()];
+                  //console.log(this.todosArry)
               }
           }
       })
@@ -377,17 +396,20 @@ export default {
         obj[data.key] = data;
         delete obj[data.key].key
       })
-      console.log(obj)
-      
+      var updates = {};
+      updates[this.user +'/subtodos/'] = obj;
+      this.database.ref().update(updates)
     }
   },
   computed: {
-    SortedMicrotasks: function(){
-      return this.subtodosArry.slice().sort((a, b) => {
-        if (a.order < b.order) return -1
-        if (a.order > b.order) return 1
-        return 0
+    matchedMicrotasks: function(){
+      const results = this.subtodosArry.filter(function(subtodo){
+        return this.todoArry.some(function(todo){
+          return subtodo.subid === todo.id
+        })
       })
+      console.log(results)
+      return results
     }
   }
 }
@@ -410,7 +432,7 @@ export default {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    margin: 3px;
+    margin: 5px;
 
     .item-title {
       width: 20%;
@@ -440,6 +462,15 @@ export default {
   .completed {
   text-decoration: line-through;
   color: grey;
+}
+
+  .dragbar{
+    opacity: 0.6;
+  }
+
+  .ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
 }
 
 .target {
