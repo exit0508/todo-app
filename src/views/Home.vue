@@ -30,7 +30,7 @@
       </div>
       <div v-for="(todo, index) in todos" v-bind:key="todo.id" class="todo-wrapper">
         <div class="item-title">
-          <input type="checkbox" v-model="todo.completed" v-on:click="completedTodo(index)" class="check-box">
+          <input type="checkbox" v-model="todo.completed" v-on:click="completedTodo(todo, index)" class="check-box">
           <div :class="{completed: todo.completed}">
             <div v-if="!todo.editing">{{ todo.title }}</div>
             <div v-else class="ui input">
@@ -100,7 +100,7 @@
             <div v-for="(subtodo, index) in subtodos" v-bind:key="subtodo.id">
               <div v-show="todo.id == subtodo.subid" class="todo-wrapper">
                 <div class="item-title">
-                  <input type="checkbox" v-model="subtodo.completed" v-on:click="completedTodo(index)" class="check-box">
+                  <input type="checkbox" v-model="subtodo.completed"  v-on:click="completeMicrotodo(subtodo, index)" class="check-box">
                     <div :class="{completed: todo.completed}">
                       <div v-if="!subtodo.editing">{{ subtodo.title }}</div>
                       <div v-else class="ui input">
@@ -193,6 +193,7 @@ export default {
       subtodosRef: null,
       getIdRef: null,
       todoKey: '',
+      subtodoKey: '',
       idForTodo: 1,
       subtodos: [],
       subtodosArry: [],
@@ -244,20 +245,28 @@ export default {
           _this.subtodos = snapshot.val();
       });
 
-      this.subtodosRef.on('value', (data)=>{
-          if(data){
-              const rootList = data.val();
-              //const key = data.key;
+      if( this.subtodosRef != null){ //DBがnullじゃなかったら
+        this.getIdSubRef = firebase.database().ref(this.user +'/subtodos').orderByChild( this.subtodoKey +'/id').limitToLast(1)
+        this.getIdSubRef.on('child_added', function(snapshot){
+          var latestSubtodo = snapshot.val()
+          _this.idForSubtodo = latestSubtodo.id + 1  //最後のidをidForTodoに代入する
+        })
+      }
 
-              if(rootList != null){
-                  Object.keys(rootList).forEach((val) => {
-                      //rootList[val].id = val;
-                      this.subtodosArry.push(rootList[val])
-                  })
-              }
+      // this.subtodosRef.on('value', (data)=>{
+      //     if(data){
+      //         const rootList = data.val();
+      //         //const key = data.key;
 
-          }
-      })
+      //         if(rootList != null){
+      //             Object.keys(rootList).forEach((val) => {
+      //                 //rootList[val].id = val;
+      //                 this.subtodosArry.push(rootList[val])
+      //             })
+      //         }
+
+      //     }
+      // })
   },
   methods: {
     addMicrotask: function(microtodo, interest, pleasant, complexity, importance){
@@ -304,6 +313,18 @@ export default {
         updates[index] = subtodo;
         this.subtodosRef.update(updates)
     },
+    completeMicrotodo(subtodo, index){
+        subtodo.completed = !subtodo.completed
+        var updates = {};
+        const now =  Date()
+      if(subtodo.completed == true){
+        updates[this.user + '/subtodos/' + index + '/completedAt'] = now
+      }else{
+        updates[this.user + '/subtodos/' + index + '/completedAt'] = null
+      }
+      updates[this.user +'/subtodos/' + index + '/completed'] =  subtodo.completed
+        this.database.ref().update(updates);
+    },
     addTodo: function(todo, interest, pleasant, complexity, importance){
       if (todo.trim().length == 0) {
             return
@@ -349,11 +370,16 @@ export default {
       this.database.ref().update(updates);
     },
     completedTodo(todo, index){
-      const now =  Date()
+      todo.completed = !todo.completed
       var updates = {};
-      updates[ index + '/completedAt'] = now
-
-      this.todosRef.update(updates);
+      const now =  Date()
+      if(todo.completed == true){
+        updates[this.user + '/todos/' + index + '/completedAt'] = now
+      }else{
+        updates[this.user + '/todos/' + index + '/completedAt'] = null
+      }
+      updates[this.user +'/todos/' + index + '/completed'] =  todo.completed
+      this.database.ref().update(updates);
     }
     
   },
