@@ -5,9 +5,9 @@
                 <a class="item active">
                     <router-link to="/home">TODOリスト</router-link>
                 </a>
-                <a class="item">
+                <!-- <a class="item">
                     使い方(準備中です！)
-                </a>
+                </a> -->
                 <div class="right menu">
                     <a v-on:click="signOut" class="ui item">
                     ログアウト
